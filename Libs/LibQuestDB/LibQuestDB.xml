@@ -1,0 +1,17 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+<!-- LibQuestDB v0.2.0 (MIT, by Pimptasty), cut down: who an NPC is, its faction and where it
+     stands, and who gives a quest, in the order its QuestDB_Camelot.toc loads them. HarvestNPCs
+     (Forever's own NPCs, from an in-game capture) must load after NPCSpawns, and HarvestNPCText
+     after NPCText. Quest text, rewards, objects, routes, the walk map and QuestieSource.lua are
+     left out. To update: replace LibQuestDB-1.0.lua and these eight files from the new release's
+     Data\Forever. -->
+<Script file="LibQuestDB-1.0.lua"/>
+<Script file="Data\Forever\_core\Locales.lua"/>
+<Script file="Data\Forever\_core\Quests.lua"/>
+<Script file="Data\Forever\_core\NPCs.lua"/>
+<Script file="Data\Forever\_core\NPCSpawns.lua"/>
+<Script file="Data\Forever\_core\HarvestNPCs.lua"/>
+<Script file="Data\Forever\_core\Zones.lua"/>
+<Script file="Data\Forever\enUS\NPCText.lua"/>
+<Script file="Data\Forever\enUS\HarvestNPCText.lua"/>
+</Ui>

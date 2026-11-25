@@ -1,0 +1,6 @@
+<!-- The game loads this file by its name; the .toc doesn't list it. -->
+<Bindings>
+    <Binding name="ALTISAN_TOGGLE" category="BINDING_HEADER_ALTISAN">
+        Altisan_ToggleWindow()
+    </Binding>
+</Bindings>

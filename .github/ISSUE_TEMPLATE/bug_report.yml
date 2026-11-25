@@ -1,0 +1,41 @@
+name: Bug report
+description: Something in Altisan isn't working.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to make it happen
+      description: If you know them.
+      placeholder: |
+        1. Open the Tailoring window on a level 20 character
+        2. Type /alt and open Shopping
+        3. Linen Cloth shows 0 although the bank has 40
+  - type: input
+    id: version
+    attributes:
+      label: Altisan version
+      description: At the top of Altisan's What's new page.
+      placeholder: "0.14.1"
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Lua error
+      description: >-
+        Paste the error if the game showed one (BugSack or the error window). Altisan also saves its
+        last errors in WTF/Account/(your account)/SavedVariables/Altisan.lua, under "errors".
+      render: text
+  - type: input
+    id: addons
+    attributes:
+      label: Other addons you use for professions, bags or tooltips
+      placeholder: "Auctionator, Bagnon, Questie"

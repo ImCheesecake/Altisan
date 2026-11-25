@@ -1,0 +1,21 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+<!-- LibItemDB v1.12.0 (MIT, by Pimptasty), cut down to where an item is sold and for how much, with
+     Forever's own data: ItemPlaces is Vanilla's filtered to Forever's items plus the vendors Forever's
+     client lists, VendorPrices Forever's. ItemPlacesLearned (places its author's players saw in game)
+     must load after ItemPlaces: it reuses that file's creatures. PlaceNames (vendor names per
+     language, each file loads only on its own client) ship no ptBR one. To update: replace
+     LibItemDB-1.0.lua and these files from the new release's Data\Forever, then run
+     dev/vendorstacks.js: prices here are for a merchant's stack. -->
+<Script file="LibItemDB-1.0.lua"/>
+<Script file="Data\Forever\_core\ItemPlaces.lua"/>
+<Script file="Data\Forever\_core\ItemPlacesLearned.lua"/>
+<Script file="Data\Forever\_core\VendorPrices.lua"/>
+<Script file="Data\Forever\deDE\PlaceNames.lua"/>
+<Script file="Data\Forever\esES\PlaceNames.lua"/>
+<Script file="Data\Forever\esMX\PlaceNames.lua"/>
+<Script file="Data\Forever\frFR\PlaceNames.lua"/>
+<Script file="Data\Forever\koKR\PlaceNames.lua"/>
+<Script file="Data\Forever\ruRU\PlaceNames.lua"/>
+<Script file="Data\Forever\zhCN\PlaceNames.lua"/>
+<Script file="Data\Forever\zhTW\PlaceNames.lua"/>
+</Ui>

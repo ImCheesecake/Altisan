@@ -1,0 +1,82 @@
+## Interface: 16001
+## Title: Altisan
+## Notes: Your crafters across all your characters, in one window.
+## Author: ImCheesecak3
+## X-License: GPL-3.0
+## Version: 0.14.1
+## IconTexture: Interface\AddOns\Altisan\Media\Icon
+## SavedVariables: AltisanDB
+## OptionalDeps: Auctionator, ForeverCore
+## AddonCompartmentFunc: Altisan_OnCompartmentClick
+## AddonCompartmentFuncOnEnter: Altisan_OnCompartmentEnter
+## AddonCompartmentFuncOnLeave: Altisan_OnCompartmentLeave
+
+# Interface 16001 = WoW Forever 1.60.1.
+# The AddonCompartment functions are globals in Minimap.lua.
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+Libs\LibProfessionDB\LibProfessionDB.xml
+Libs\LibQuestDB\LibQuestDB.xml
+Libs\LibItemDB\LibItemDB.xml
+Libs\QuestieDBForever\QuestieDBForever.lua
+
+Core\Core.lua
+# The shared quest tracker column (after Core.lua: it reads ns.L and ns.TrackerHostSettings).
+# ForeverCore, when installed, loads first (OptionalDeps) and draws it instead.
+Libs\ForeverTracker\TrackerQuestie.lua
+Libs\ForeverTracker\TrackerEqot.lua
+Libs\ForeverTracker\TrackerLock.lua
+Libs\ForeverTracker\TrackerOrder.lua
+Libs\ForeverTracker\TrackerHost.lua
+Data\Recipes.lua
+Data\Sources.lua
+Data\Trainers.lua
+Data\Favor.lua
+Data\VendorStacks.lua
+Data\Places.lua
+Data\Legacy.lua
+Data\ItemUses.lua
+Game\ItemTooltip.lua
+Data\Bags.lua
+Data\Mail.lua
+Data\Cooldowns.lua
+Data\Ignore.lua
+Data\Gathering.lua
+UI\Theme.lua
+UI\Widgets.lua
+UI\WindowLooks.lua
+UI\Window.lua
+UI\Text.lua
+UI\Page.lua
+UI\Lists.lua
+UI\RecipeParts.lua
+UI\PlanParts.lua
+Pages\NextUp.lua
+Data\RecipesOnHand.lua
+Pages\Overview.lua
+Data\CoverageData.lua
+Pages\Coverage.lua
+Data\AuctionHouse.lua
+Data\Tracking.lua
+Data\ShoppingPlan.lua
+Data\SkillPlan.lua
+Data\SkillPlanText.lua
+Pages\Shopping.lua
+Data\CampData.lua
+Pages\Camp.lua
+Pages\GatherView.lua
+Game\Tracker.lua
+Pages\WhatsNew.lua
+UI\Dropdown.lua
+UI\Feedback.lua
+Pages\SlotFilter.lua
+Pages\StatFilter.lua
+Pages\SourceFilter.lua
+Pages\RecipeView.lua
+Game\ProfessionCard.lua
+Game\Minimap.lua
+Game\Settings.lua
+Game\Debug.lua
