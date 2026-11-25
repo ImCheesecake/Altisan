@@ -27,3 +27,12 @@ Altisan can read its recipes.
 
 GPLv3, see `LICENSE`. The libraries in `Libs/` keep their own licenses, listed in
 `Libs/README.md`.
+
+`Libs/QuestieDBForever` is built from [QuestieDB](https://github.com/Questie/QuestieDB)'s data.
+To rebuild it, clone QuestieDB, then run:
+
+```
+cd dev
+npm install fengari@0.1.4
+node questiedb.js <path to QuestieDB>
+```
