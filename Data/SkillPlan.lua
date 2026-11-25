@@ -1,6 +1,6 @@
--- SkillPlan.lua: the way from a character's skill to the most their training allows: the fewest
--- crafts and materials, the account's holdings breaking ties (or, with Auctionator, the cheapest),
--- and the plans put on Shopping.
+-- SkillPlan.lua: the way from a character's skill to the most their training allows, using what the
+-- account holds first (or, with Auctionator, the cheapest), kept until a step can't be done, and
+-- the plans put on Shopping.
 
 local _, ns = ...
 local Plan = {}
@@ -12,11 +12,12 @@ local MAX_DEPTH = 3
 local SWITCH = 1.2
 local LEARN = 1.2
 local TIE = 1.1
-local UNKNOWN_WEIGHT = 100
+local FETCH = EFFORT
 local SHORT, FOLD, TRIES = 2, 10000, 6
 local FOLD_SHARE = 0.03
 
--- The window scan saves the game's own grey; the library's yellow is moved to match the color the window showed.
+-- The window scan saves the game's own grey; the library's yellow is moved to match the color the
+-- window showed.
 local function Levels(recipeID, skillLine, scan)
     local t = ns.SkillUpLevels(skillLine, recipeID)
     local saved = ns.db.recipes[recipeID]
@@ -40,7 +41,8 @@ local function Chance(c, skill)
 end
 Plan.Chance = Chance
 
--- The library lists vendors that stand nowhere in the world: only ones with a place on the map count.
+-- The library lists vendors that stand nowhere in the world: only ones with a place on the map
+-- count.
 function Plan.LearnFrom(recipeID)
     local kind = ns.RecipeSourceKind(recipeID)
     if kind == "Trainer" then return "trainer" end
@@ -97,46 +99,56 @@ function Plan.Cheapest()
     return ns.db.window.planCheapest == true and ns.AH.Available()
 end
 
--- Not loaded yet: a middle weight now, and the plans are worked out again once it loads.
-local asked = {}
-local function SellPrice(itemID)
-    local price = select(11, C_Item.GetItemInfo(itemID))
-    if price then return math.max(price, 1) end
-    -- Once per item: one that loads without a price would otherwise be asked for again and again.
-    if not asked[itemID] then
-        asked[itemID] = true
-        ns.UI.WhenItemLoads(itemID, ns.RefreshWindow)
-    end
-    return UNKNOWN_WEIGHT
+local function KeptRoute(key, skillLine)
+    local mine = ns.db.planRoutes[key]
+    local route = mine and mine[skillLine]
+    if route and route.cheapest == Plan.Cheapest() then return route end
 end
 
--- Sell prices can't tell a material you farm from one the auction house is full of (both 1-2c);
--- only Auctionator's prices can.
-local function Farmed(itemID)
-    if not ns.AH.Available() or #ns.RecipesMaking(itemID) > 0 or ns.Places.Vendors(itemID) then return false end
-    return not ns.AH.GetPrice(itemID)
+local function KeepRoute(key, skillLine, plan)
+    local mine = ns.db.planRoutes[key] or {}
+    ns.db.planRoutes[key] = mine
+    if plan.reason or plan.reached < plan.target then
+        mine[skillLine] = nil
+        return
+    end
+    local steps = {}
+    for i, s in ipairs(plan.steps) do steps[i] = { s.recipeID, s.from, s.to } end
+    mine[skillLine] = { target = plan.target, cheapest = Plan.Cheapest(), steps = steps }
 end
 
-local function Weigher()
-    local weights = {}
-    local function Weight(itemID, depth)
-        local id = itemID .. ":" .. depth
-        if weights[id] then return weights[id] end
-        local best
-        if depth < MAX_DEPTH then
-            for _, m in ipairs(ns.RecipesMaking(itemID)) do
-                local sum = 0
-                for _, r in ipairs(ns.Reagents(m.recipeID, m.skillLine)) do sum = sum + r[2] * Weight(r[1], depth + 1) end
-                sum = sum / ns.MadePer(m.recipeID)
-                if sum > 0 and (not best or sum < best) then best = sum end
-            end
-        end
-        local sell = SellPrice(itemID)
-        local weight = best and math.min(best, sell) or sell
-        weights[id] = weight
-        return weight
+local function KeptRecipe(route, skill)
+    for _, s in ipairs(route.steps) do
+        if skill >= s[2] and skill < s[3] then return s[1] end
     end
-    return Weight
+end
+
+local remade = {}
+local function Order(steps)
+    local ids = {}
+    for i, s in ipairs(steps) do ids[i] = s.recipeID or s[1] end
+    return table.concat(ids, ",")
+end
+
+function Plan.Forget(key, skillLine)
+    local mine = ns.db.planRoutes[key]
+    local route = mine and mine[skillLine]
+    remade[key .. ":" .. skillLine] = { before = route and Order(route.steps) or "" }
+    if mine then mine[skillLine] = nil end
+    ns.RefreshWindow()
+end
+
+function Plan.Remade(plan)
+    local id = plan.key .. ":" .. plan.skillLine
+    local r = remade[id]
+    if not r then return nil end
+    local now = Order(plan.steps)
+    r.after = r.after or now
+    if r.after ~= now then
+        remade[id] = nil
+        return nil
+    end
+    return r.before == now and "same" or "changed"
 end
 
 local NONE = {}
@@ -147,7 +159,7 @@ local function Banned(banned, recipeID, skill)
     return false
 end
 
-local function Route(list, key, skillLine, banned)
+local function Route(list, key, skillLine, banned, follow)
     local char = ns.db.characters[key]
     local prof
     for _, p in ipairs(char and char.professions or {}) do
@@ -215,18 +227,18 @@ local function Route(list, key, skillLine, banned)
         if price then return price, from end
         return DEAR
     end
-    local cheapest, Weight = Plan.Cheapest(), Weigher()
+    local cheapest = Plan.Cheapest()
+    local function Fetch(itemID)
+        local price, from = Price(itemID)
+        return from == "vendor" and price or FETCH
+    end
     local function CraftCost(c)
         if c.cost then return c.cost end
         pricing = c
         local cost = EFFORT
         for _, r in ipairs(c.reagents) do
-            if cheapest then
-                local short = r[2] - LeftInReach(r[1])
-                if short > 0 then cost = cost + short * UnitCost(r[1], 1) end
-            else
-                cost = cost + r[2] * (Weight(r[1], 1) + (Farmed(r[1]) and EFFORT or 0))
-            end
+            local short = r[2] - LeftInReach(r[1])
+            if short > 0 then cost = cost + short * (cheapest and UnitCost(r[1], 1) or Fetch(r[1])) end
         end
         pricing = nil
         c.cost = cost
@@ -302,7 +314,17 @@ local function Route(list, key, skillLine, banned)
             end
         end
         local lowest = bestCost
-        if best and not cheapest then
+        if follow then
+            local want = KeptRecipe(follow, skill)
+            best = nil
+            for _, o in ipairs(options) do
+                if o.c.recipeID == want then best, bestCost, bestChance = o.c, o.cost, o.chance end
+            end
+            if not best then
+                plan.broken = true
+                break
+            end
+        elseif best and not cheapest then
             local pick
             for _, o in ipairs(options) do
                 if o.cost <= lowest * TIE then
@@ -312,7 +334,7 @@ local function Route(list, key, skillLine, banned)
             end
             best, bestCost, bestChance = pick.c, pick.cost, pick.chance
         end
-        if lastCost and lastCost <= lowest * SWITCH then best, bestCost, bestChance = last, lastCost, lastChance end
+        if not follow and lastCost and lastCost <= lowest * SWITCH then best, bestCost, bestChance = last, lastCost, lastChance end
         plan.score = (plan.score or 0) + (bestCost or 0)
         if not best then
             plan.reason = "none"
@@ -357,7 +379,7 @@ local function ShortStep(plan, tried)
     end
 end
 
-function Plan.Make(list, key, skillLine)
+local function Fresh(list, key, skillLine)
     local plan = Route(list, key, skillLine, {})
     if not plan then return nil end
     local banned, tried = {}, {}
@@ -376,6 +398,17 @@ function Plan.Make(list, key, skillLine)
             plan, banned = folded, trial
         end
     end
+    return plan
+end
+
+function Plan.Make(list, key, skillLine)
+    local route, plan = KeptRoute(key, skillLine), nil
+    if route then
+        plan = Route(list, key, skillLine, {}, route)
+        if plan and (plan.broken or plan.target ~= route.target) then plan = nil end
+    end
+    plan = plan or Fresh(list, key, skillLine)
+    if plan then KeepRoute(key, skillLine, plan) end
     return plan
 end
 

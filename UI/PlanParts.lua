@@ -107,17 +107,22 @@ function UI.StepBar(parent)
     return f
 end
 
-local function PlanButton(blocks, plan, gap)
+local function PlanButton(blocks, plan, gap, remake)
     local SP = ns.SkillPlan
     local tracked = SP.Tracked(plan.key, plan.skillLine) ~= nil
-    blocks:Buttons({ {
+    local buttons = { {
         label = tracked and "Remove plan from shopping list" or "Add plan to shopping list",
         kind = tracked and "primary" or "quiet",
         onClick = function() SP.Toggle(plan.key, plan.skillLine) end,
         tip = tracked and "On the Shopping page. It shrinks as the skill goes up and leaves at the target. A click takes it off now."
             or ("Puts every step's materials on the Shopping page: who can mail what to %s, what to make first and what to buy.")
                 :format(UI.CharName(plan.char, plan.key)),
-    } }, gap)
+    } }
+    if remake then
+        buttons[2] = { label = "Make a new plan", onClick = function() SP.Forget(plan.key, plan.skillLine) end,
+                       tip = "Replaces this plan with one from your skill and what your characters hold now." }
+    end
+    blocks:Buttons(buttons, gap)
 end
 
 local function Flags(plan)
@@ -267,7 +272,9 @@ function UI.PlanPaneBlocks(blocks, plan, opts)
         end
     end
     if plan.reason == "none" then blocks:Text(UI.Soft(NothingLine(plan.steps[#plan.steps].to)), 6) end
-    PlanButton(blocks, plan, 12)
+    PlanButton(blocks, plan, 12, true)
+    local remade = ns.SkillPlan.RemadeLine(plan)
+    if remade then blocks:Text(UI.ColorText(UI.TEXT.muted, remade), 6) end
     if odds then OddsNote(blocks) end
 end
 

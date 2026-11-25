@@ -35,8 +35,7 @@ end
 
 local function PassesFilters(char, key, me)
     if key == ns.CharacterKey() then return true end
-    -- Forever's rulesets (Normal, PvP, RP, Hardcore) are reported as realms.
-    if not ns.db.list.otherRealms and char.realm ~= me.realm then return false end
+    if not ns.db.list.otherRealms and not ns.Bags.SameRuleset(char, me) then return false end
     if not ns.db.list.otherFaction and char.faction ~= me.faction then return false end
     return true
 end

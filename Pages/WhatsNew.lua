@@ -9,6 +9,23 @@ ns.WhatsNew = WhatsNew
 -- Newest first; the first version must match the .toc's. No date means not released yet.
 WhatsNew.CHANGES = {
     {
+        version = "0.15.0",
+        date = "2026-11-25",
+        intro = "The plan to the next rank now uses what you already have.",
+        groups = {
+            { "New", {
+                { "Plan to the next rank", "**Make a new plan** works it out again from what your characters hold now, and says if it's still the best way." },
+            } },
+            { "Changed", {
+                { "Plan to the next rank", "uses the materials your characters already have first, instead of what a vendor would pay for them, and keeps the same plan until a step can't be done." },
+                { "Forever data", "more recipes show who drops them." },
+            } },
+            { "Fixed", {
+                { "Characters", "since Forever removed realms from names, characters showed up twice or went missing. Each one shows once again, characters on your other ruleset are hidden by default again, and plans no longer count on mail between rulesets." },
+            } },
+        },
+    },
+    {
         version = "0.14.1",
         date = "2026-11-24",
         intro = "Newer Forever data: vendors for more items, more recipe drops, and city NPCs on the city's map.",

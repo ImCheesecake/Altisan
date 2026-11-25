@@ -12,7 +12,7 @@ Altisan embeds these libraries unchanged. Each belongs to its authors.
 | LibQuestDB | 0.2.0 (minor 26), NPCs and quest givers | MIT | https://www.curseforge.com/wow/addons/questdb (project 1700352, file 9768606) |
 | LibItemDB | 1.12.0 (minor 49), where items are sold and their price, Forever's data | MIT | https://www.curseforge.com/wow/addons/libitemdb (project 1558208, file 9780481) |
 | ForeverTracker | shortest-path-forever commit 7231cca (2026-11-09), `UI/TrackerQuestie.lua`, `TrackerEqot.lua`, `TrackerLock.lua`, `TrackerOrder.lua`, `TrackerHost.lua` | GPL-3.0-or-later (`LICENSE`) | https://github.com/cjber/shortest-path-forever |
-| QuestieDBForever | QuestieDB commit ab2e0fd (after 1.1.5, 2026-11-24), Forever recipe sources, item vendors and their NPCs | GPLv3 (`LICENSE.md`) | https://github.com/Questie/QuestieDB |
+| QuestieDBForever | QuestieDB commit 4377c98 (1.1.6, 2026-11-25), Forever recipe sources, item vendors and their NPCs | GPLv3 (`LICENSE.md`) | https://github.com/Questie/QuestieDB |
 
 All three Lib*DB are by Pimptasty (the name in their licences), https://www.curseforge.com/members/pmptasty on CurseForge.
 

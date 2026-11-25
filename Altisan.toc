@@ -3,7 +3,7 @@
 ## Notes: Your crafters across all your characters, in one window.
 ## Author: ImCheesecak3
 ## X-License: GPL-3.0
-## Version: 0.14.1
+## Version: 0.15.0
 ## IconTexture: Interface\AddOns\Altisan\Media\Icon
 ## SavedVariables: AltisanDB
 ## OptionalDeps: Auctionator, ForeverCore

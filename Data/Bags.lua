@@ -135,9 +135,13 @@ end
 function Bags.IsBankOpen() return bankOpen end
 
 -- Mail only reaches the same faction on the same realm (Forever's rulesets are realms too).
+function Bags.SameRuleset(a, b)
+    return a.realm == b.realm and (not a.ruleset or not b.ruleset or a.ruleset == b.ruleset)
+end
+
 function Bags.CanMail(from, to)
     if from == to then return true end
-    return from.realm == to.realm and (not from.faction or not to.faction or from.faction == to.faction)
+    return Bags.SameRuleset(from, to) and (not from.faction or not to.faction or from.faction == to.faction)
 end
 
 function Bags.CanReach(list, char, exceptKey)

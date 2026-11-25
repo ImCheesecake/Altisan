@@ -47,6 +47,7 @@ local DEFAULTS = {
     accountBank = {},
     tracked = {},
     plans = {},
+    planRoutes = {},
     questLog = {},
     stock = {},
     stockInTracker = false,
@@ -122,6 +123,69 @@ function ns.CharacterKey()
     return fullName .. "-" .. GetNormalizedRealmName()
 end
 
+local function Newer(a, b)
+    if not a or not b then return a or b end
+    return (b.scanned or 0) > (a.scanned or 0) and b or a
+end
+
+local function MergeInto(new, old)
+    for _, place in ipairs({ "bags", "bank", "mail" }) do new[place] = Newer(new[place], old[place]) end
+    new.recipes, new.cooldowns = new.recipes or {}, new.cooldowns or {}
+    for line, scan in pairs(old.recipes or {}) do new.recipes[line] = Newer(new.recipes[line], scan) end
+    for id, timer in pairs(old.cooldowns or {}) do new.cooldowns[id] = new.cooldowns[id] or timer end
+    new.ruleset = new.ruleset or old.ruleset
+end
+
+local function Rekey(list, old, new, field)
+    local have = {}
+    for _, entry in ipairs(list) do if entry.key == new then have[entry[field]] = entry end end
+    for i = #list, 1, -1 do
+        local entry = list[i]
+        if entry.key == old then
+            local same = have[entry[field]]
+            if same then
+                same.count = same.count and math.max(same.count, entry.count or 0)
+                table.remove(list, i)
+            else
+                entry.key = new
+            end
+        end
+    end
+end
+
+-- Forever dropped realms from names when layers came in: "Name-Realm" keys become "Name-", and the
+-- old realm stays as the ruleset, since PvP and PvE characters still can't mail each other.
+function ns.MergeRealmKeys(db)
+    if GetNormalizedRealmName() ~= "" then return end
+    local olds = {}
+    for key, char in pairs(db.characters) do
+        local realm = char.realm
+        if realm and realm ~= "" and key:sub(-#realm - 1) == "-" .. realm then olds[#olds + 1] = key end
+    end
+    table.sort(olds)
+    for _, old in ipairs(olds) do
+        local char = db.characters[old]
+        local new = old:sub(1, -#char.realm - 1)
+        char.ruleset = char.ruleset or char.realm
+        local twin = db.characters[new]
+        if not (twin and twin.ruleset and twin.ruleset ~= char.ruleset) then
+            if twin then MergeInto(twin, char) else char.realm, db.characters[new] = "", char end
+            db.characters[old] = nil
+            Rekey(db.tracked, old, new, "recipe")
+            Rekey(db.plans, old, new, "skillLine")
+            for _, byKey in ipairs({ db.questLog, db.notPlayed, db.planRoutes }) do
+                if byKey[new] == nil then byKey[new] = byKey[old] end
+                byKey[old] = nil
+            end
+            for _, other in pairs(db.characters) do
+                for _, scan in pairs(other.recipes or {}) do
+                    if scan.listFrom == old then scan.listFrom = new end
+                end
+            end
+        end
+    end
+end
+
 local function MoveOldRecord()
     local name, second = UnitFullName("player")
     if not (name and second and second ~= "") then return end
@@ -150,6 +214,7 @@ function ns.ForgetCharacter(key)
     db.characters[key] = nil
     db.notPlayed[key] = nil
     db.questLog[key] = nil
+    db.planRoutes[key] = nil
     for _, line in ipairs(lines) do ns.FillLoginListsFrom(line) end
     for _, saved in ipairs({ db.tracked, db.plans }) do
         for i = #saved, 1, -1 do
@@ -249,6 +314,7 @@ end
 
 function handlers.PLAYER_LOGIN()
     MoveOldRecord()
+    ns.MergeRealmKeys(ns.db)
     ns.ScanCharacter()
     ns.CreateMinimapButton()
     ns.CreateSettings()

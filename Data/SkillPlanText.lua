@@ -203,6 +203,12 @@ function Plan.Size(plan)
     return ("%s, %s"):format(UI.Count(recipes, "recipe", "recipes"), UI.Count(plan.crafts, "craft", "crafts"))
 end
 
+function Plan.RemadeLine(plan)
+    local how = Plan.Remade(plan)
+    if how == "same" then return "New plan made: still the best way." end
+    if how == "changed" then return ("New plan made: %s."):format(Plan.Size(plan)) end
+end
+
 function Plan.RowParts(step)
     return ("%d ×"):format(step.make), ("%d to %d"):format(step.from, step.to)
 end
